@@ -10,6 +10,7 @@ export type WeatherData = {
     temp: number | undefined;
     weather: string | undefined;
     icon: string | undefined;
+    city: string | undefined;
 }
 
 
@@ -34,9 +35,9 @@ async function handle_geolocation_request(city: string, API_key: string, input_c
     }
 }
 
-async function handle_weather_request(city: string, API_key: string, input_clear: Function): Promise<WeatherData> {
+async function handle_weather_request(city: string, API_key: string, input_clear: Function, input_clear_plc: Function): Promise<WeatherData> {
     try {
-        const data = await handle_geolocation_request(city, API_key, input_clear);
+        const data = await handle_geolocation_request(city, API_key, input_clear_plc);
         const weather_endpoint = `https://api.openweathermap.org/data/2.5/weather?lat=${data[0].lat}&lon=${data[0].lon}&appid=${API_key}&units=metric`;
         const weather_data = await (await fetch(weather_endpoint)).json();
         const weather_result: WeatherData = {
@@ -45,13 +46,14 @@ async function handle_weather_request(city: string, API_key: string, input_clear
             pressure: weather_data.main.pressure,
             temp: weather_data.main.temp,
             weather: weather_data.weather[0].description,
-            icon: weather_data.weather[0].icon
+            icon: weather_data.weather[0].icon,
+            city: weather_data.name
         }
         input_clear();
         return weather_result;
     }
     catch (error) {
-        input_clear();
+        input_clear_plc();
         alert("You put non existing city name or wrong name, check for typo ! :D");
         return {} as WeatherData;
     }
