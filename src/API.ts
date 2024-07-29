@@ -8,31 +8,53 @@ export type WeatherData = {
     humidity: number | undefined;
     pressure: number | undefined;
     temp: number | undefined;
+    weather: string | undefined;
+    icon: string | undefined;
 }
 
 
 
-async function handle_geolocation_request(city: string, API_key: string): Promise<GeoMetadata[]> {
-    const URL = `http://api.openweathermap.org/geo/1.0/direct?q=${city}&appid=${API_key}`;
-    const data = await ( await fetch(URL)).json();
-    const result_data = data.map((geo: GeoMetadata) => ({
-        lat: geo.lat,
-        lon: geo.lon
-    }))
-    return result_data;
-}
-
-async function handle_weather_request(city: string,API_key: string): Promise<WeatherData> {
-    const data = await handle_geolocation_request(city, API_key);
-    const weather_endpoint = `https://api.openweathermap.org/data/2.5/weather?lat=${data[0].lat}&lon=${data[0].lon}&appid=${API_key}&units=metric`;
-    const weather_data = await (await fetch(weather_endpoint)).json();
-    const weather_result: WeatherData = {
-        feels_like: weather_data.main.feels_like,
-        humidity: weather_data.main.humidity,
-        pressure: weather_data.main.pressure,
-        temp: weather_data.main.temp
+async function handle_geolocation_request(city: string, API_key: string, input_clear: Function): Promise<GeoMetadata[]> {
+    if (city === '') {
+        input_clear();
+        return [] as GeoMetadata[];
     }
-    return weather_result;
+    try {
+        const URL = `https://api.openweathermap.org/geo/1.0/direct?q=${city}&appid=${API_key}`;
+        const data = await (await fetch(URL)).json();
+        const result_data = data.map((geo: GeoMetadata) => ({
+            lat: geo.lat,
+            lon: geo.lon
+        }))
+        return result_data;
+    }
+    catch (error) {
+        input_clear();
+        return [] as GeoMetadata[];
+    }
+}
+
+async function handle_weather_request(city: string, API_key: string, input_clear: Function): Promise<WeatherData> {
+    try {
+        const data = await handle_geolocation_request(city, API_key, input_clear);
+        const weather_endpoint = `https://api.openweathermap.org/data/2.5/weather?lat=${data[0].lat}&lon=${data[0].lon}&appid=${API_key}&units=metric`;
+        const weather_data = await (await fetch(weather_endpoint)).json();
+        const weather_result: WeatherData = {
+            feels_like: weather_data.main.feels_like,
+            humidity: weather_data.main.humidity,
+            pressure: weather_data.main.pressure,
+            temp: weather_data.main.temp,
+            weather: weather_data.weather[0].description,
+            icon: weather_data.weather[0].icon
+        }
+        input_clear();
+        return weather_result;
+    }
+    catch (error) {
+        input_clear();
+        alert("You put non existing city name or wrong name, check for typo ! :D");
+        return {} as WeatherData;
+    }
 }
 
 export default handle_weather_request;

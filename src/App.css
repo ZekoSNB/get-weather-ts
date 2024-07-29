@@ -33,7 +33,18 @@ h1 {
 
 .TodoForm {
   width: 100%;
-  margin-bottom: 1rem;
+  /* margin-bottom: 1rem; */
+}
+
+.weather-icon-wrap {
+  display: flex;
+  justify-content: center;
+  flex-direction: row;
+  align-items: center;
+}
+
+.icon-img {
+  width: 25px;
 }
 
 .todo-input {
@@ -42,7 +53,6 @@ h1 {
   border: 1px solid #8758ff;
   padding: 0.5rem 1rem;
   margin-top: 1rem;
-  margin-bottom: 2rem;
   width: 300px;
   color: #fff;
 }
